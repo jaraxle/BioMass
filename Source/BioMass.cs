@@ -12,6 +12,7 @@ namespace KSPBioMass
      * Load Persistent Game
      * 
      */
+/*
 #if DEBUG
     [KSPAddon(KSPAddon.Startup.MainMenu, false)]
     public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour
@@ -33,10 +34,10 @@ namespace KSPBioMass
         }
     }
 #endif
-
+*/
 
     /*
-     * HookMethod to get or Scenario load at Spacecenter
+     * HookMethod to get BioMass Scenario load at Spacecenter
      * Credits to TAC Life Support
     */
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
@@ -68,13 +69,17 @@ namespace KSPBioMass
 
     public class BioMass : ScenarioModule
     {
+        public static BioMass Instance { get; private set; }
         public Settings globalSettings { get; private set; }
+        public SaveGame saveGame { get; private set; }
         private readonly List<Component> controller = new List<Component>();
 
         public BioMass()
         {
-            this.Log_DebugOnly("Constructor BioMass");           
+            this.Log_DebugOnly("Constructor BioMass");
+            Instance = this;
             globalSettings = new Settings();
+            saveGame = new SaveGame();
         }
 
         public override void OnAwake()
@@ -97,13 +102,14 @@ namespace KSPBioMass
                 controller.Add(c);
                 globalSettings.controller.Add(c);
             }
+ 
         }
 
         public override void OnLoad(ConfigNode gameNode)
         {
             base.OnLoad(gameNode);
 
-            //gameConfig.Load(gameNode);
+            saveGame.Load(gameNode);
             globalSettings.Load();
             this.Log("OnLoad: " + gameNode + "\n");
         }
@@ -111,9 +117,8 @@ namespace KSPBioMass
         public override void OnSave(ConfigNode gameNode)
         {
             base.OnSave(gameNode);
-            //gameConfig.Save(gameNode);
+            saveGame.Save(gameNode);
 
-            // Save the global settings
             globalSettings.Save();
             this.Log("OnSave: " + gameNode + "\n");
         }
