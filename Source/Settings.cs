@@ -55,6 +55,8 @@ namespace KSPBioMass
         public double OxygenProductionRate { get; set; }
         public double WaterProductionRate { get; set; }
 
+        public DifficultySetting DifficultyBioMass;
+
         public int FoodId
         {
             get
@@ -202,6 +204,7 @@ namespace KSPBioMass
             CO2ProductionRate = 0.00000612f;
             OxygenProductionRate = 0.00001468f;
             WaterProductionRate = 0.00000250f;
+            DifficultyBioMass = DifficultySetting.Normal;
         }
         
         public Boolean FileExists(string FileName)
@@ -228,7 +231,7 @@ namespace KSPBioMass
                     {
                         s.Load(globalSettingsNode);
                     }
-                    this.Log_DebugOnly("Load GlobalSettings");
+                    this.LogWarning("Load GlobalSettings");
                     blnReturn = true;
                 }
                 else
@@ -276,6 +279,8 @@ namespace KSPBioMass
                 CO2ProductionRate = Utilities.GetValue(settingsNode, "CO2ProductionRate", CO2ProductionRate) / MaxDeltaTime;
                 OxygenProductionRate = Utilities.GetValue(settingsNode, "OxygenProductionRate", OxygenProductionRate) / MaxDeltaTime;
                 WaterProductionRate = Utilities.GetValue(settingsNode, "WaterProductionRate", WaterProductionRate) / MaxDeltaTime;
+                DifficultyBioMass = Utilities.GetValue(settingsNode, "DifficultySettings",DifficultyBioMass);
+                this.LogWarning("Difficulty read "+DifficultyBioMass.ToString());
             }
         }
 
@@ -296,7 +301,7 @@ namespace KSPBioMass
                     s.Save(globalSettingsNode);
                 }
                 globalSettingsNode.Save(GlobalConfigFile);
-                this.Log_DebugOnly("Save GlobalSettings");
+                this.LogWarning("Save GlobalSettings");
                 blnReturn = true;
             }
             catch (Exception ex)
@@ -345,6 +350,64 @@ namespace KSPBioMass
             settingsNode.AddValue("CO2ProductionRate", CO2ProductionRate * MaxDeltaTime);
             settingsNode.AddValue("OxygenProductionRate", OxygenProductionRate * MaxDeltaTime);
             settingsNode.AddValue("WaterProductionRate", WaterProductionRate * MaxDeltaTime);
+
+            settingsNode.AddValue("DifficultySettings", DifficultyBioMass);
+        }
+
+        public void setDifficultySettings(DifficultySetting difficulty)
+        {
+            
+            if (difficulty == DifficultyBioMass)
+            {
+                return;
+            }
+
+            DifficultyBioMass = difficulty;
+            switch (difficulty)
+            {
+                case DifficultySetting.Easy:
+                    WasteWaterConsumptionRate = 0.00000826f;
+                    WaterConsumptionRate = 0.00000826f;
+                    OxygenConsumptionRate = 0.00000445;
+                    CO2ConsumptionRate = 0.00002018f;
+
+                    CO2ProductionRate = 0.00001612f;
+                    OxygenProductionRate = 0.00002468f;
+                    WaterProductionRate = 0.00001250f;
+                    break;
+                case DifficultySetting.Normal:
+                    WasteWaterConsumptionRate = 0.00000826f;
+                    WaterConsumptionRate = 0.00000826f;
+                    OxygenConsumptionRate = 0.00000445;
+                    CO2ConsumptionRate = 0.00002018f;
+
+                    CO2ProductionRate = 0.00000612f;
+                    OxygenProductionRate = 0.00001468f;
+                    WaterProductionRate = 0.00000250f;
+                    break;
+                case DifficultySetting.Hard:
+                    WasteWaterConsumptionRate = 0.00000526f;
+                    WaterConsumptionRate = 0.00001326f;
+                    OxygenConsumptionRate = 0.00000945;
+                    CO2ConsumptionRate = 0.00004018f;
+
+                    CO2ProductionRate = 0.00000912f;
+                    OxygenProductionRate = 0.00000868f;
+                    WaterProductionRate = 0.00000150f;
+                    break;
+                case DifficultySetting.Custom:
+                    WasteWaterConsumptionRate = 0.00000826f;
+                    WaterConsumptionRate = 0.00000826f;
+                    OxygenConsumptionRate = 0.00000445;
+                    CO2ConsumptionRate = 0.00002018f;
+
+                    CO2ProductionRate = 0.00000612f;
+                    OxygenProductionRate = 0.00001468f;
+                    WaterProductionRate = 0.00000250f;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

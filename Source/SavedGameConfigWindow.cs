@@ -47,6 +47,14 @@ namespace KSPBioMass
 
 
         private bool showBioMassConsumption = false;
+
+
+        private DifficultySetting BioMassDifficulty;
+        private bool EasySettings = false;
+        private bool NormalSettings = false;
+        private bool HardSettings = false;
+        private bool CustomSettings = false;
+
  
         private readonly string version;
 
@@ -56,7 +64,7 @@ namespace KSPBioMass
             base.Resizable = false;
             this.globalSettings = globalSettings;
             this.saveGame = saveGame;
-
+            this.changeSettings(globalSettings.DifficultyBioMass, true);
             version = Utilities.GetDllVersion(this);
         }
 
@@ -91,20 +99,44 @@ namespace KSPBioMass
         protected override void DrawWindowContents(int windowId)
         {
             GUILayout.Label("Version: " + version, labelStyle);
-            GUILayout.Label("Configure BioMass", headerStyle);
-
+            GUILayout.Space(3);
+            DifficultySettings();
             GUILayout.Space(10);
             BioMassConsumptionRates();
 
             if (GUI.changed)
             {
-                SetSize(10, 10);
+                SetSize(150, 20);
             }
+        }
+
+        private void DifficultySettings()
+        {
+            GUILayout.Label("Difficulty Settings", headerStyle);
+            GUILayout.Space(3);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Toggle(EasySettings, "Easy", buttonStyle))
+            {
+                changeSettings(DifficultySetting.Easy,false);
+            }
+            if (GUILayout.Toggle(NormalSettings, "Normal", buttonStyle))
+            {
+                changeSettings(DifficultySetting.Normal,false);
+            }
+            if (GUILayout.Toggle(HardSettings, "Hard", buttonStyle))
+            {
+                changeSettings(DifficultySetting.Hard,false);
+            }
+            if (GUILayout.Toggle(CustomSettings, "Custom", buttonStyle))
+            {
+                changeSettings(DifficultySetting.Custom,false);
+            }
+            GUILayout.EndHorizontal();
         }
 
         private void BioMassConsumptionRates()
         {
-            showBioMassConsumption = GUILayout.Toggle(showBioMassConsumption, "BioMass Consumption Rates", buttonStyle);
+            showBioMassConsumption = GUILayout.Toggle(showBioMassConsumption, "Consumption/Production Rates", buttonStyle);
 
             if (showBioMassConsumption)
             {
@@ -112,6 +144,7 @@ namespace KSPBioMass
                 GUILayout.Label("These settings affect all saves. Restart KSP for changes to take effect.", warningStyle);
                 GUILayout.Label("The following values are in units per day (24 hours).", headerStyle);
 
+                GUILayout.Label("Consumption", headerStyle2);
                 globalSettings.WaterConsumptionRate = Utilities.ShowTextField("Water Consumption Rate", labelStyle,
                     globalSettings.WaterConsumptionRate * globalSettings.MaxDeltaTime, 30, editStyle, GUILayout.MinWidth(150)) / globalSettings.MaxDeltaTime;
                 globalSettings.WasteWaterConsumptionRate = Utilities.ShowTextField("Waste Water Consumption Rate", labelStyle,
@@ -121,8 +154,8 @@ namespace KSPBioMass
                 globalSettings.CO2ConsumptionRate = Utilities.ShowTextField("CarbonDioxide Consumption Rate", labelStyle,
                     globalSettings.CO2ConsumptionRate * globalSettings.MaxDeltaTime, 30, editStyle, GUILayout.MinWidth(150)) / globalSettings.MaxDeltaTime;
 
-                GUILayout.Space(5);
-                
+                GUILayout.Space(15);
+                GUILayout.Label("Production", headerStyle2);
                 globalSettings.WaterProductionRate = Utilities.ShowTextField("Water Production Rate", labelStyle,
                     globalSettings.WaterProductionRate * globalSettings.MaxDeltaTime, 30, editStyle, GUILayout.MinWidth(150)) / globalSettings.MaxDeltaTime;
                 globalSettings.CO2ProductionRate = Utilities.ShowTextField("CarbonDioxide Production Rate", labelStyle,
@@ -130,16 +163,60 @@ namespace KSPBioMass
                 globalSettings.OxygenProductionRate = Utilities.ShowTextField("Oxygen Production Rate", labelStyle,
                     globalSettings.OxygenProductionRate * globalSettings.MaxDeltaTime, 30, editStyle, GUILayout.MinWidth(150)) / globalSettings.MaxDeltaTime;
 
-                GUILayout.Space(5);
-
+                GUILayout.Space(15);
+                GUILayout.Label("Misc", headerStyle);
                 globalSettings.MaxDeltaTime = (int)Utilities.ShowTextField("Max Delta Time", labelStyle, globalSettings.MaxDeltaTime,
                     30, editStyle, GUILayout.MinWidth(150));
-                globalSettings.ElectricityMaxDeltaTime = (int)Utilities.ShowTextField("Max Delta Time (Electricity)", labelStyle,
-                    globalSettings.ElectricityMaxDeltaTime, 30, editStyle, GUILayout.MinWidth(150));
 
                 GUILayout.EndVertical();
             }
         }
 
+
+        private void changeSettings(DifficultySetting diff,bool initialSet)
+        {
+            if (diff == BioMassDifficulty)
+            {
+                return;
+            }
+
+            this.Log_DebugOnly("Change Difficulty FROM " + BioMassDifficulty.ToString() + " TO "+diff);
+            EasySettings = false;
+            NormalSettings = false;
+            HardSettings = false;
+            CustomSettings = false;
+
+            BioMassDifficulty = diff;
+
+            switch (BioMassDifficulty)
+            {
+                case DifficultySetting.Easy:
+                    EasySettings = true;
+                    break;
+                case DifficultySetting.Normal:
+                    NormalSettings = true;
+                    break;
+                case DifficultySetting.Hard:
+                    HardSettings = true;
+                    break;
+                case DifficultySetting.Custom:
+                    CustomSettings = true;
+                    break;
+                default:
+                    break;
+            }
+
+            if (!initialSet)
+              globalSettings.setDifficultySettings(BioMassDifficulty);
+
+        }
+    }
+
+    public enum DifficultySetting
+    {
+        Easy,
+        Normal,
+        Hard,
+        Custom
     }
 }

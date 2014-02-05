@@ -88,6 +88,8 @@ namespace KSPBioMass
             this.Log_DebugOnly("Wakeup in " + HighLogic.LoadedScene);
             base.OnAwake();
 
+            globalSettings.Load();
+
             if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
             {
                 this.Log_DebugOnly("Adding SpaceCenter Controller");
@@ -111,7 +113,6 @@ namespace KSPBioMass
 
             saveGame.Load(gameNode);
             globalSettings.Load();
-            this.Log("OnLoad: " + gameNode + "\n");
         }
 
         public override void OnSave(ConfigNode gameNode)
@@ -120,7 +121,6 @@ namespace KSPBioMass
             saveGame.Save(gameNode);
 
             globalSettings.Save();
-            this.Log("OnSave: " + gameNode + "\n");
         }
 
         void OnDestroy()
