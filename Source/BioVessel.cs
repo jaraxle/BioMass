@@ -10,14 +10,35 @@ namespace KSPBioMass
     {
         public const string ConfigNodeName = "BioVessel";
 
-        public string vesselName;
-        public string vesselType;
-        public double BioMass;
-        public int numOccupiedParts;
-
+        public string vesselName;       
         public double lastUpdate;
 
-        public double MaxBioMass;
+        public double bioMass;
+        public double maxBioMass;
+
+        //Inputs for Biomass
+        public double remainingWater;
+        public double remainingWasteWater;
+        public double remainingOxygen;
+        public double remainingCO2;
+
+        //Last 
+        public double lastWater;
+        public double lastWasteWater;
+        public double lastOxygen;
+        public double lastCO2;
+
+        //Consumptionrates
+        public double estimatedWaterConsumptionPerDeltaTime;
+        public double estimatedWasteWaterConsumptionPerDeltaTime;
+        public double estimatedOxygenConsumptionPerDeltaTime;
+        public double estimatedCO2ConsumptionPerDeltaTime;
+
+        //Time
+        public double estimatedWaterTime;
+        public double estimatedWasteWaterTime;
+        public double estimatedOxygenTime;
+        public double estimatedCO2Time;
 
         public BioVessel(string vesselName, double currentTime)
         {
@@ -31,9 +52,29 @@ namespace KSPBioMass
             double lastUpdate = Utilities.GetValue(node, "lastUpdate", 0.0);
 
             BioVessel info = new BioVessel(vesselName, lastUpdate);
-            info.vesselType = Utilities.GetValue(node, "vesselType", "Unknown");
-            info.numOccupiedParts = Utilities.GetValue(node, "numOccupiedParts", 0);
-            info.BioMass = Utilities.GetValue(node, "bioMass", 0.0);
+            info.bioMass = Utilities.GetValue(node, "bioMass", 0.0);
+            info.maxBioMass = Utilities.GetValue(node, "maxBioMass", 0.0);
+
+            info.remainingWater = Utilities.GetValue(node, "remainingWater", 0.0);
+            info.remainingWasteWater = Utilities.GetValue(node, "remainingWasteWater", 0.0);
+            info.remainingOxygen = Utilities.GetValue(node, "remainingOxygen", 0.0);
+            info.remainingCO2 = Utilities.GetValue(node, "remainingCO2", 0.0);
+
+            info.lastWater = Utilities.GetValue(node, "lastWater", 0.0);
+            info.lastWasteWater = Utilities.GetValue(node, "lastWasteWater", 0.0);
+            info.lastOxygen = Utilities.GetValue(node, "lastOxygen", 0.0);
+            info.lastCO2 = Utilities.GetValue(node, "lastCO2", 0.0);
+
+            info.estimatedWaterConsumptionPerDeltaTime = Utilities.GetValue(node, "estimatedWaterConsumptionPerDeltaTime", 0.0);
+            info.estimatedWasteWaterConsumptionPerDeltaTime = Utilities.GetValue(node, "estimatedWasteWaterConsumptionPerDeltaTime", 0.0);
+            info.estimatedOxygenConsumptionPerDeltaTime = Utilities.GetValue(node, "estimatedOxygenConsumptionPerDeltaTime", 0.0);
+            info.estimatedCO2ConsumptionPerDeltaTime = Utilities.GetValue(node, "estimatedCO2ConsumptionPerDeltaTime", 0.0);
+
+            info.estimatedWaterTime = Utilities.GetValue(node, "estimatedWaterTime", 0.0);
+            info.estimatedWasteWaterTime = Utilities.GetValue(node, "estimatedWasteWaterTime", 0.0);
+            info.estimatedOxygenTime = Utilities.GetValue(node, "estimatedOxygenTime", 0.0);
+            info.estimatedCO2Time = Utilities.GetValue(node, "estimatedCO2Time", 0.0);
+
             return info;
         }
 
@@ -41,25 +82,41 @@ namespace KSPBioMass
         {
             ConfigNode node = config.AddNode(ConfigNodeName);
             node.AddValue("vesselName", vesselName);
-            node.AddValue("vesselType", vesselType);
-            node.AddValue("bioMass", BioMass);
-            node.AddValue("numOccupiedParts", numOccupiedParts);
-
             node.AddValue("lastUpdate", lastUpdate);
+
+            node.AddValue("bioMass", bioMass);
+            node.AddValue("maxBioMass", maxBioMass);
+
+            node.AddValue("remainingWater", remainingWater);
+            node.AddValue("remainingWasteWater", remainingWasteWater);
+            node.AddValue("remainingOxygen", remainingOxygen);
+            node.AddValue("remainingCO2", remainingCO2);
+
+            node.AddValue("lastWater", lastWater);
+            node.AddValue("lastWasteWater", lastWasteWater);
+            node.AddValue("lastOxygen", lastOxygen);
+            node.AddValue("lastCO2", lastCO2);
+
+            node.AddValue("estimatedWaterConsumptionPerDeltaTime", estimatedWaterConsumptionPerDeltaTime);
+            node.AddValue("estimatedWasteWaterConsumptionPerDeltaTime", estimatedWasteWaterConsumptionPerDeltaTime);
+            node.AddValue("estimatedOxygenConsumptionPerDeltaTime", estimatedOxygenConsumptionPerDeltaTime);
+            node.AddValue("estimatedCO2ConsumptionPerDeltaTime", estimatedCO2ConsumptionPerDeltaTime);
+
+            node.AddValue("estimatedWaterTime", estimatedWaterTime);
+            node.AddValue("estimatedWasteWaterTime", estimatedWasteWaterTime);
+            node.AddValue("estimatedOxygenTime", estimatedOxygenTime);
+            node.AddValue("estimatedCO2Time", estimatedCO2Time);
             return node;
         }
 
         public void ClearAmounts()
         {
-            numOccupiedParts = 0;
-            BioMass = 0.0;
-            MaxBioMass = 0.0;
+            bioMass = 0.0;
+            maxBioMass = 0.0;
+            remainingWater = 0.0;
+            remainingWasteWater = 0.0;
+            remainingOxygen = 0.0;
+            remainingCO2 = 0.0;
         }
-
-        public enum Status
-        {
-            GOOD,
-            LOW,
-            CRITICAL
-        }
+    }
 }

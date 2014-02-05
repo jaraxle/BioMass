@@ -5,6 +5,7 @@ using System.Text;
 using KSP;
 using UnityEngine;
 using Tac;
+using KSP.IO;
 
 namespace KSPBioMass
 {
@@ -12,11 +13,11 @@ namespace KSPBioMass
     {
         //Static
         public static String AddonName = "BioMass+Science";
-        public static String PathKSP = KSPUtil.ApplicationRootPath.Replace("\\", "/");
-        public static String PathPlugin = string.Format("{0}GameData/{1}", PathKSP, AddonName);
-        public static String PathPluginData = string.Format("{0}/PluginData", PathPlugin);
-        public static String PathTextures = string.Format("{0}/Textures", PathPlugin);
-        public static String GlobalConfigFile = string.Format("{0}/BioMass.cfg", PathPluginData);
+        public static String PathKSP;        
+        public static String PathPlugin;
+        public static String PathPluginData;
+        public static String PathTextures;
+        public static String GlobalConfigFile;
         
         public ConfigNode globalSettingsNode = new ConfigNode();
         public List<Component> controller = new List<Component>();
@@ -44,6 +45,15 @@ namespace KSPBioMass
         public string BioCake { get; private set; }
         public string CompressedCO2 { get; private set; }
         public string Hydrogen { get; private set; }
+
+        public double WasteWaterConsumptionRate { get; set; }
+        public double WaterConsumptionRate { get; set; }
+        public double OxygenConsumptionRate { get; set; }
+        public double CO2ConsumptionRate { get; set; }
+
+        public double CO2ProductionRate { get; set; }
+        public double OxygenProductionRate { get; set; }
+        public double WaterProductionRate { get; set; }
 
         public int FoodId
         {
@@ -138,11 +148,34 @@ namespace KSPBioMass
             }
         }
 
+        private string GetKSPPath(string strSource)
+        {
+            int Start, End;
+            if (strSource.Contains(AddonName))
+            {
+                Start = 0;
+                End = strSource.IndexOf(AddonName, 0) - 1;
+                return strSource.Substring(Start, End - Start);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
         public Settings()
         {
             this.Log_DebugOnly("Constructor Settings");
-            this.Log_DebugOnly("ConfigFile: " + GlobalConfigFile);
+            
+            //string filepath = IOUtils.GetFilePathFor(this.GetType(), "XYZ");
+            //PathKSP = GetKSPPath(filepath);
+            PathPlugin = string.Format("{0}",AddonName);
+            PathPluginData = string.Format("{0}/PluginData", PathPlugin);
+            PathTextures = string.Format("{0}/Textures", PathPlugin);
+            GlobalConfigFile = IOUtils.GetFilePathFor(this.GetType(), "BioMass.cfg");
 
+            this.Log_DebugOnly("ConfigFile: " + GlobalConfigFile);
+            
             this.globalSettingsNode = new ConfigNode();
 
             MaxDeltaTime = SECONDS_PER_DAY; // max 1 day (24 hour) per physics update, or 50 days (4,320,000 seconds) per second
@@ -160,6 +193,15 @@ namespace KSPBioMass
             BioCake = "BioCake";
             CompressedCO2 = "CompressedCO2";
             Hydrogen = "Hydrogen";
+
+            WasteWaterConsumptionRate = 0.00000826f;
+            WaterConsumptionRate = 0.00000826f;
+            OxygenConsumptionRate = 0.00000445;
+            CO2ConsumptionRate = 0.00002018f;
+
+            CO2ProductionRate = 0.00000612f;
+            OxygenProductionRate = 0.00001468f;
+            WaterProductionRate = 0.00000250f;
         }
         
         public Boolean FileExists(string FileName)
@@ -213,7 +255,7 @@ namespace KSPBioMass
                 ElectricityMaxDeltaTime = Utilities.GetValue(settingsNode, "ElectricityMaxDeltaTime", ElectricityMaxDeltaTime);
 
                 Food = Utilities.GetValue(settingsNode, "FoodResource", Food);
-                Water = Utilities.GetValue(settingsNode, "WaterResource", Water);
+                Water = Utilities.GetValue(settingsNode, "WaterRes4600urce", Water);
                 Oxygen = Utilities.GetValue(settingsNode, "OxygenResource", Oxygen);
                 CO2 = Utilities.GetValue(settingsNode, "CarbonDioxideResource", CO2);
                 Waste = Utilities.GetValue(settingsNode, "WasteResource", Waste);
@@ -225,6 +267,15 @@ namespace KSPBioMass
                 BioCake = Utilities.GetValue(settingsNode, "BioCakeResource", BioCake);
                 CompressedCO2 = Utilities.GetValue(settingsNode, "CompressedCO2Resource", CompressedCO2);
                 Hydrogen = Utilities.GetValue(settingsNode, "HydrogenResource", Hydrogen);
+
+                WasteWaterConsumptionRate = Utilities.GetValue(settingsNode, "WasteWaterConsumptionRate", WasteWaterConsumptionRate) / MaxDeltaTime;
+                WaterConsumptionRate = Utilities.GetValue(settingsNode, "WaterConsumptionRate", WaterConsumptionRate) / MaxDeltaTime;
+                OxygenConsumptionRate = Utilities.GetValue(settingsNode, "OxygenConsumptionRate", OxygenConsumptionRate) / MaxDeltaTime;
+                CO2ConsumptionRate = Utilities.GetValue(settingsNode, "CO2ConsumptionRate", CO2ConsumptionRate) / MaxDeltaTime;
+
+                CO2ProductionRate = Utilities.GetValue(settingsNode, "CO2ProductionRate", CO2ProductionRate) / MaxDeltaTime;
+                OxygenProductionRate = Utilities.GetValue(settingsNode, "OxygenProductionRate", OxygenProductionRate) / MaxDeltaTime;
+                WaterProductionRate = Utilities.GetValue(settingsNode, "WaterProductionRate", WaterProductionRate) / MaxDeltaTime;
             }
         }
 
@@ -285,6 +336,15 @@ namespace KSPBioMass
             settingsNode.AddValue("BioCakeResource", BioCake);
             settingsNode.AddValue("CompressedCO2Resource", CompressedCO2);
             settingsNode.AddValue("HydrogenResource", Hydrogen);
+
+            settingsNode.AddValue("WasteWaterConsumptionRate", WasteWaterConsumptionRate * MaxDeltaTime);
+            settingsNode.AddValue("WaterConsumptionRate", WaterConsumptionRate * MaxDeltaTime);
+            settingsNode.AddValue("OxygenConsumptionRate", OxygenConsumptionRate * MaxDeltaTime);
+            settingsNode.AddValue("CO2ConsumptionRate", CO2ConsumptionRate * MaxDeltaTime);
+
+            settingsNode.AddValue("CO2ProductionRate", CO2ProductionRate * MaxDeltaTime);
+            settingsNode.AddValue("OxygenProductionRate", OxygenProductionRate * MaxDeltaTime);
+            settingsNode.AddValue("WaterProductionRate", WaterProductionRate * MaxDeltaTime);
         }
     }
 }

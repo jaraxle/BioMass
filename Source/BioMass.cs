@@ -12,7 +12,7 @@ namespace KSPBioMass
      * Load Persistent Game
      * 
      */
-/*
+
 #if DEBUG
     [KSPAddon(KSPAddon.Startup.MainMenu, false)]
     public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour
@@ -34,7 +34,7 @@ namespace KSPBioMass
         }
     }
 #endif
-*/
+
 
     /*
      * HookMethod to get BioMass Scenario load at Spacecenter
