@@ -1,5 +1,9 @@
 Currently I write an own DLL here for BioMass.
 
+WIP 0.4 - 06.02.14            
+- Difficulty Settings
+
+
 WIP 0.3 - 05.02.14
 - Window for Inflight Monitoring all "BioMass"-Vessels
 - using Bars from ARP (Author: TriggerAu)
